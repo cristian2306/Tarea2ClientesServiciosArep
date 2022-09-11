@@ -2,6 +2,7 @@
 [![ProjectDesign](https://www.herokucdn.com/deploy/button.png)](https://desolate-wildwood-11249.herokuapp.com/)
 ## Path  
 - /Mario.png
+- /Lion.png
 - /ArchivoPrueba.html
 - /style.css
 - /prueba.js
