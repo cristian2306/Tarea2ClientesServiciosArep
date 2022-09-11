@@ -5,13 +5,37 @@
 package edu.eci.escuelaing.arem.namesncs;
 
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.Base64.Encoder;
+
+import javax.imageio.ImageIO;
+
 import java.io.*;
 
 //Hacer que el servidor acepte mas de una peticion -> Hecho
 //Hacer que funcione el script de la primera tarea
 public class HttpServer {
 
+    public static final String HTML_HEADER = "HTTP/1.1 200 OK\r\n"
+            + "Content-Type: text/html\r\n"
+            + "\r\n";
+    public static final String JS_HEADER = "HTTP/1.1 200 OK\r\n"
+            + "Content-Type: text/javascript\r\n"
+            + "\r\n";
+    public static final String IMG_HEADER = "HTTP/1.1 200 OK\r\n"
+            + "Content-Type: image/jpeg\r\n";
+    public static final String CSS_HEADER = "HTTP/1.1 200 OK\r\n"
+            + "Content-Type: text/css\r\n"
+            + "\r\n";
+    public static final String ERROR_HEADER = "HTTP/1.1 400 Bad Request\r\n";
+    
+
     public static void main(String[] args) throws IOException {
+        // System.out.println(readFile("src/main/java/edu/eci/escuelaing/arem/namesncs/ArchivoPrueba.html"));
+        // readImage("C:/Users/Cristian/Desktop/Tarea2ClientesServiciosArep/src/main/resources/img/ImagenOculta.jpg");
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(35000);
@@ -21,7 +45,6 @@ public class HttpServer {
         }
         boolean running = true;
         while (running) {
-            String name = "";
             Socket clientSocket = null;
             try {
                 System.out.println("Listo para recibir ...");
@@ -30,44 +53,19 @@ public class HttpServer {
                 System.err.println("Accept failed.");
                 System.exit(1);
             }
-
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(
                             clientSocket.getInputStream()));
-            String inputLine, outputLine;
-            
             String firstLine = in.readLine();
-            System.out.println("FirstLine: " + firstLine);
+            System.out.println("FirstLine:" + firstLine.substring(4)+ "Line:   "+ firstLine);
             String[] line = firstLine.split(" ");
             System.out.println("Line  : "+ line[1]);
-            if(line[1].contains("?")){
-                String[] query = line[1].split("=");
-                name = query[1];
-                System.out.println("Name: " + name);
+            try{
+                getFile(clientSocket, line[1]); 
+            }catch(IOException e){
+                out.println(ERROR_HEADER);
             }
-            String[] query = line[1].split("=");
-            while ((inputLine = in.readLine()) != null) {
-                System.out.println("Received: " + inputLine);
-                if (!in.ready()) {
-                    break;
-                }
-            }
-            if(name.equals("")){
-                outputLine = getForm();
-            }else{
-                outputLine = "HTTP/1.1 200 OK\r\n"
-                + "Content-Type: text/html\r\n"
-                + "\r\n" 
-                + "<!DOCTYPE html>\n"
-                + "<html>\n"
-                + "<body>\n"
-                + "Hello " + name + "\n"
-                + "</body>\n"
-                + "</html>\n";
-            }
-            out.println(outputLine);
-
             out.close();
             in.close();
             clientSocket.close();
@@ -75,10 +73,79 @@ public class HttpServer {
         serverSocket.close();
     }
 
+    /**
+     * Lee el archivo dado, y lo entrega en una pagina
+     * 
+     * @param Path Direccion del archivo a leer
+     * @return Documento leido en un string
+     * @throws IOException
+     */
+    public static void readFile(Socket client, String path, String extension) throws IOException {
+        System.out.println("Leyendo Archivo");
+        String[] header = getHeader(extension);
+        System.out.println(header[0]);
+        path = header[1] + path; 
+        PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+        if(header[0].equals(ERROR_HEADER)){
+            out.println(header[1]);
+        }else{
+            Path file = Paths.get(path);
+            StringBuffer output = new StringBuffer();
+            output.append(header[0]);
+            InputStream in = Files.newInputStream(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                output.append(line + "\n");
+            }
+            out.println(output);
+        }
+    }
+
+    public static String[] getHeader(String extension){
+        if(extension.equals("html")){
+            return new String[]{HTML_HEADER,"src/main/resources/public"};
+        }else if(extension.equals("css")){
+            return new String[]{CSS_HEADER,"src/main/resources/public/css"};
+        }else if(extension.equals("js")){
+            return new String[]{JS_HEADER,"src/main/resources/public/js"};
+        }else{
+            return new String[]{ERROR_HEADER,""};
+        }
+    }
+
+    public static void getFile(Socket client, String path) throws IOException{
+        System.out.println("Path: "+ path+" "+ path.split("\\.") + path.substring(1));
+        String extension = "";
+        extension = (path.contains(".")) ? path.split("\\.")[1]:"";
+        System.out.println("Extension:"+ extension);
+        if(extension.equals("png")){
+            readImage(path, client.getOutputStream());
+        }else{
+            readFile(client, path, extension);
+        }
+    }
+
+    public static void readImage(String path, OutputStream outS) throws IOException{
+        System.out.println("Leyendo imagen");
+        path = "src/main/resources/img" + path; 
+        System.out.println("ImgPath:"+path);
+        File file = new File(path);
+        FileInputStream fis = new FileInputStream(file);
+        byte[] data = new byte[(int) file.length()];
+        fis.read(data);
+        fis.close();
+        DataOutputStream binaryOut = new DataOutputStream(outS);
+        binaryOut.writeBytes("HTTP/1.0 200 OK\r\n");
+        binaryOut.writeBytes("Content-Type: image/png\r\n");
+        binaryOut.writeBytes("Content-Length: " + data.length);
+        binaryOut.writeBytes("\r\n\r\n");
+        binaryOut.write(data);
+        binaryOut.close();
+    }
+
     public static String getForm() {
-        return "HTTP/1.1 200 OK\r\n"
-                + "Content-Type: text/html\r\n"
-                + "\r\n" 
+        return HTML_HEADER
                 + "<!DOCTYPE html>\n"
                 + "<html>\n"
                 + "    <head>\n"
