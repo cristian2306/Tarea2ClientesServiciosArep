@@ -63,12 +63,16 @@ public class HttpServer {
                 String[] line = firstLine.split(" ");
                 System.out.println("Line  : "+ line[1]);
                 try{
-                    getFile(clientSocket, line[1]); 
+                    if(line[1].equals("/")){
+                        getFile(clientSocket, "/index.html");
+                    }else{
+                            getFile(clientSocket, line[1]); 
+                    }
                 }catch(IOException e){
                     out.println(ERROR_HEADER);
                 }
             }else{
-                out.println(ERROR_HEADER);
+                getFile(clientSocket, "index.html");
             }
             out.close();
             in.close();
@@ -119,7 +123,7 @@ public class HttpServer {
     }
 
     public static void getFile(Socket client, String path) throws IOException{
-        System.out.println("Path: "+ path+" "+ path.split("\\.") + path.substring(1));
+        System.out.println("Path:"+ path+"|");
         String extension = "";
         extension = (path.contains(".")) ? path.split("\\.")[1]:"";
         System.out.println("Extension:"+ extension);
@@ -131,7 +135,7 @@ public class HttpServer {
     }
 
     public static void readImage(String path, OutputStream outS) throws IOException{
-        System.out.println("Leyendo imagen");
+        System.out.println("Leyendo imagen: "+path);
         path = "src/main/resources/img" + path; 
         System.out.println("ImgPath:"+path);
         File file = new File(path);

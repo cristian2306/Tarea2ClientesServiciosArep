@@ -1,8 +1,14 @@
 
-function mostrarMensaje1() {
-    alert('Bienvenido al curso JavaScript de aprenderaprogramar.com');
+function mostrarImagen1() {
+    alert('Leon Ruge!!');
+    const image = document.getElementById("img");
+    image.src = "Lion.png";
+    image.hidden = false;
 }
 
-function mostrarMensaje2() {
-    alert('Ha hecho click sobre el párrafo inferior');
+function mostrarImagen2() {
+    alert('Yahoo!');
+    const image = document.getElementById("img");
+    image.src = "Mario.png";
+    image.hidden = false;
 }
