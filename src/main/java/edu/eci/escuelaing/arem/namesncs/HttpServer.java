@@ -58,7 +58,7 @@ public class HttpServer {
                     new InputStreamReader(
                             clientSocket.getInputStream()));
             String firstLine = in.readLine();
-            System.out.println("FirstLine:" + firstLine.substring(4)+ "Line:   "+ firstLine);
+            System.out.println("FirstLine:" + firstLine);
             String[] line = firstLine.split(" ");
             System.out.println("Line  : "+ line[1]);
             try{
