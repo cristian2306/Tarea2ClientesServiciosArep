@@ -58,12 +58,16 @@ public class HttpServer {
                     new InputStreamReader(
                             clientSocket.getInputStream()));
             String firstLine = in.readLine();
-            System.out.println("FirstLine:" + firstLine);
-            String[] line = firstLine.split(" ");
-            System.out.println("Line  : "+ line[1]);
-            try{
-                getFile(clientSocket, line[1]); 
-            }catch(IOException e){
+            if(firstLine !=null){
+                System.out.println("FirstLine:" + firstLine);
+                String[] line = firstLine.split(" ");
+                System.out.println("Line  : "+ line[1]);
+                try{
+                    getFile(clientSocket, line[1]); 
+                }catch(IOException e){
+                    out.println(ERROR_HEADER);
+                }
+            }else{
                 out.println(ERROR_HEADER);
             }
             out.close();
