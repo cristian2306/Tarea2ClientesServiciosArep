@@ -47,7 +47,7 @@ public class HttpServer {
         while (running) {
             Socket clientSocket = null;
             try {
-                System.out.println("Listo para recibir ...");
+                System.out.println("Listo para recibir ..."+ "Port: " + serverSocket.getLocalPort());
                 clientSocket = serverSocket.accept();
             } catch (IOException e) {
                 System.err.println("Accept failed.");
