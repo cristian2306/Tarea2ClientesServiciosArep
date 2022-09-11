@@ -40,7 +40,7 @@ public class HttpServer {
         try {
             serverSocket = new ServerSocket(getPort());
         } catch (IOException e) {
-            System.err.println("Could not listen on port: 35000.");
+            System.err.println("Could not listen on port: "+ serverSocket.getLocalPort());
             System.exit(1);
         }
         boolean running = true;
