@@ -72,7 +72,7 @@ public class HttpServer {
                     out.println(ERROR_HEADER);
                 }
             }else{
-                getFile(clientSocket, "index.html");
+                getFile(clientSocket, "/index.html");
             }
             out.close();
             in.close();
