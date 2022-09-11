@@ -38,7 +38,7 @@ public class HttpServer {
         // readImage("C:/Users/Cristian/Desktop/Tarea2ClientesServiciosArep/src/main/resources/img/ImagenOculta.jpg");
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(35000);
+            serverSocket = new ServerSocket(getPort());
         } catch (IOException e) {
             System.err.println("Could not listen on port: 35000.");
             System.exit(1);
@@ -142,6 +142,13 @@ public class HttpServer {
         binaryOut.writeBytes("\r\n\r\n");
         binaryOut.write(data);
         binaryOut.close();
+    }
+
+    static int getPort() {
+        if (System.getenv("PORT") != null) {
+            return Integer.parseInt(System.getenv("PORT"));
+        }
+        return 35000; //returns default port if heroku-port isn't set
     }
 
     public static String getForm() {
